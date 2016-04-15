@@ -132,7 +132,8 @@ function HDF5DataSet:partial(...)
 
     if #ranges ~= 0 and type(ranges[1]) ~= 'table' then
         tensor = table.remove(ranges, 1)
-        assert(tensor:nDimension() == nDims)
+        assert(tensor:nDimension() == nDims, "Expected user-supplied tensor to have " .. nDims .. " dimensions, not " ..
+            tensor:nDimensions() .. ".")
 
         -- If the user supplies the buffer but no extents, then we assume that the entire buffer
         -- should be filled by the read operation.
@@ -167,9 +168,13 @@ function HDF5DataSet:partial(...)
         tensor = factory():resize(storage)
     else
         -- Additional checks for the user-supplied tensor.
-        assert(tensor:type() == torch.type(factory()))
+        local expected_type = torch.type(factory())
+        assert(tensor:type() == expected_type, "Expected user-supplied tensor to have type " .. expected_type ..
+            ", not " .. tensor:type() .. ".")
+
         for i = 1, nDims do
-            assert(tensor:size(i) == storage[i])
+            assert(tensor:size(i) == storage[i], "Expected extent " .. i .. " of user-supplied tensor to be " ..
+                storage[i] .. ", not " .. storage[i] .. ".")
         end
     end
 
