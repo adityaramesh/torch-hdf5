@@ -134,6 +134,8 @@ function HDF5DataSet:partial(...)
         tensor = table.remove(ranges, 1)
         assert(tensor:nDimension() == nDims, "Expected user-supplied tensor to have " .. nDims .. " dimensions, not " ..
             tensor:nDimension() .. ".")
+        print(#ranges)
+        print(ranges)
     end
 
     if #ranges == 0 or #ranges > nDims then
