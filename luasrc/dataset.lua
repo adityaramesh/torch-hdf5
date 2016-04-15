@@ -134,12 +134,11 @@ function HDF5DataSet:partial(...)
         tensor = table.remove(ranges, 1)
         assert(tensor:nDimension() == nDims, "Expected user-supplied tensor to have " .. nDims .. " dimensions, not " ..
             tensor:nDimension() .. ".")
-        print(#ranges)
-        print(ranges)
     end
 
     if #ranges == 0 or #ranges > nDims then
-        error("HDF5DataSet:partial() - dimension mismatch. Expected " .. nDims .. " but " .. #ranges .. " were given.")
+        error("HDF5DataSet:partial() - dimension mismatch. Expected at least 1 and at most " .. nDims .. " but " ..
+            #ranges .. " were given.")
     elseif #ranges < nDims then
         -- If fewer than `nDims` ranges are provided, then we set each remaining range to the
         -- maximum extents of the corresponding dimension.
