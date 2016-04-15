@@ -128,9 +128,20 @@ end
 function HDF5DataSet:partial(...)
     local ranges = { ... }
     local nDims = hdf5.C.H5Sget_simple_extent_ndims(self._dataspaceID)
-    if #ranges ~= nDims then
+
+    if #ranges == 0 or #ranges > nDims then
         error("HDF5DataSet:partial() - dimension mismatch. Expected " .. nDims .. " but " .. #ranges .. " were given.")
+    elseif #ranges < nDims then
+        -- If fewer than `nDims` ranges are provided, we set each remaining range to the maximum
+        -- extent of the corresponding dimension.
+        local size = self:dataspaceSize()
+        assert(#size == nDims)
+
+        for i = #ranges + 1, nDims do
+            ranges[i] = {1, size[i]}
+        end
     end
+
     -- TODO dedup
     local null = hdf5.ffi.new("hsize_t *")
     local offset, count = rangesToOffsetAndCount(ranges)
