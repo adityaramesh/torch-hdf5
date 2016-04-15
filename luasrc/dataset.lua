@@ -134,14 +134,6 @@ function HDF5DataSet:partial(...)
         tensor = table.remove(ranges, 1)
         assert(tensor:nDimension() == nDims, "Expected user-supplied tensor to have " .. nDims .. " dimensions, not " ..
             tensor:nDimension() .. ".")
-
-        -- If the user supplies the buffer but no extents, then we assume that the entire buffer
-        -- should be filled by the read operation.
-        if #ranges == 0 then
-            for i = 1, nDims do
-                ranges[i] = {1, tensor:size(i)}
-            end
-        end
     end
 
     if #ranges == 0 or #ranges > nDims then
@@ -174,7 +166,7 @@ function HDF5DataSet:partial(...)
 
         for i = 1, nDims do
             assert(tensor:size(i) == storage[i], "Expected extent " .. i .. " of user-supplied tensor to be " ..
-                storage[i] .. ", not " .. storage[i] .. ".")
+                storage[i] .. ", not " .. tensor:size(i) .. ".")
         end
     end
 
