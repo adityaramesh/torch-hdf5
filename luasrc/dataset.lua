@@ -128,12 +128,17 @@ end
 function HDF5DataSet:partial(...)
     local ranges = { ... }
     local nDims = hdf5.C.H5Sget_simple_extent_ndims(self._dataspaceID)
+    local tensor = nil
+
+    if #ranges ~= 0 and type(ranges[1]) ~= 'table' then
+        tensor = table.remove(ranges, 1)
+    end
 
     if #ranges == 0 or #ranges > nDims then
         error("HDF5DataSet:partial() - dimension mismatch. Expected " .. nDims .. " but " .. #ranges .. " were given.")
     elseif #ranges < nDims then
         -- If fewer than `nDims` ranges are provided, we set each remaining range to the maximum
-        -- extent of the corresponding dimension.
+        -- extents of the corresponding dimension.
         local size = self:dataspaceSize()
         assert(#size == nDims)
 
@@ -145,9 +150,19 @@ function HDF5DataSet:partial(...)
     -- TODO dedup
     local null = hdf5.ffi.new("hsize_t *")
     local offset, count = rangesToOffsetAndCount(ranges)
-    -- Create a new tensor of the correct type and size
     local factory, nativeType = self:getTensorFactory()
-    local tensor = factory():resize(hsizeToLongStorage(count, #ranges))
+    local storage = hsizeToLongStorage(count, #ranges)
+
+    if not tensor then
+        -- Create a new tensor of the correct type and size
+        tensor = factory():resize(storage)
+    else
+        -- Check that the user-supplied tensor is valid.
+        assert(tensor:type() == torch.type(f()))
+        for i = 1, nDims do
+            assert(tensor:size(i) == storage[i])
+        end
+    end
 
     local stride = null
 
