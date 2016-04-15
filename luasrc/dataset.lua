@@ -137,7 +137,7 @@ function HDF5DataSet:partial(...)
         -- If the user supplies the buffer but no extents, then we assume that the entire buffer
         -- should be filled by the read operation.
         if #ranges == 0 then
-            for i in 1, nDims do
+            for i = 1, nDims do
                 ranges[i] = {1, tensor:size(i)}
             end
         end
